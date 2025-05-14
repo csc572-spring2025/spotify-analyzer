@@ -1,0 +1,133 @@
+{
+  "topArtists": {
+    "numUniqueArtists": 1136,
+    "topArtists": [
+      {
+        "artistUri": "spotify:artist:4Uc8Dsxct0oMqx0P6i60ea"
+      },
+      {
+        "artistUri": "spotify:artist:164Uj4eKjl6zTBKfJLFKKK"
+      },
+      {
+        "artistUri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
+      },
+      {
+        "artistUri": "spotify:artist:6qqNVTkY8uBg9cP3Jd7DAH"
+      },
+      {
+        "artistUri": "spotify:artist:1McMsnEElThX1knmY4oliG"
+      }
+    ],
+    "topArtistMilliseconds": 137453281,
+    "topArtistFanPercentage": 0.0012017962
+  },
+  "topPodcasts": {
+    "topPodcastsUri": [
+    ],
+    "topPodcastPercentage": 0.0,
+    "totalPodcastMilliseconds": 12624867
+  },
+  "topTracks": {
+    "topTracks": [
+      "spotify:track:3vPSh4esaFZ8yk48kSAuuv",
+      "spotify:track:2YOGCTiPJWMhZRdeadFj8G",
+      "spotify:track:0QZ5yyl6B6utIWkxeBDxQN",
+      "spotify:track:1xK59OXxi2TAAAbmZK0kBL",
+      "spotify:track:1TQXIltqoZ5XXyfCbAeSQQ"
+    ],
+    "topTrackPlayCount": 198,
+    "topTrackFirstPlayedDate": "2024-01-01",
+    "distinctTracksPlayed": 2115
+  },
+  "yearlyMetrics": {
+    "totalMsListened": 4083332888,
+    "mostListenedDay": "2024-09-14",
+    "mostListenedDayMinutes": 867.3604,
+    "percentGreaterThanWorldwideUsers": 97.79596
+  },
+  "musicEvolution": {
+    "eras": [
+      {
+        "key": "0",
+        "peakMonth": 1,
+        "color": "green-blue",
+        "genre": "pop",
+        "mood": "serotonin",
+        "descriptor": "western",
+        "pivotalArtists": [
+          "spotify:artist:1McMsnEElThX1knmY4oliG",
+          "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+          "spotify:artist:4AK6F7OLvEQ5QYCBNiQWHq"
+        ],
+        "tracks": [
+          {
+            "trackName": "Ghost Of You",
+            "trackUri": "spotify:track:1MhXdlCQPnO56T57MfmaRm"
+          },
+          {
+            "trackName": "Off My Face",
+            "trackUri": "spotify:track:3T03rPwlL8NVk1yIaxeD8U"
+          },
+          {
+            "trackName": "Paper Houses",
+            "trackUri": "spotify:track:1hJ6KojJObbRvjuVj8Ezya"
+          }
+        ]
+      },
+      {
+        "key": "1",
+        "peakMonth": 4,
+        "color": "green",
+        "genre": "soundtrack",
+        "mood": "cottagecore",
+        "descriptor": "fantasy",
+        "pivotalArtists": [
+          "spotify:artist:7nzSoJISlVJsn7O0yTeMOB",
+          "spotify:artist:0YC192cP3KPCRWx8zr8MfZ",
+          "spotify:artist:24eDfi2MSYo3A87hCcgpIL"
+        ],
+        "tracks": [
+          {
+            "trackName": "Oogway Ascends",
+            "trackUri": "spotify:track:1dZCiUTIbbvwOCALmzBh9y"
+          },
+          {
+            "trackName": "Can You Hear The Music",
+            "trackUri": "spotify:track:4VnDmjYCZkyeqeb0NIKqdA"
+          },
+          {
+            "trackName": "Falling You (電視劇《點燃我, 溫暖你》插曲)",
+            "trackUri": "spotify:track:3WyvUozCMIrVx2IGijtx6m"
+          }
+        ]
+      },
+      {
+        "key": "2",
+        "peakMonth": 10,
+        "color": "red",
+        "genre": "love song",
+        "mood": "romantic",
+        "descriptor": "slow dance",
+        "pivotalArtists": [
+          "spotify:artist:164Uj4eKjl6zTBKfJLFKKK",
+          "spotify:artist:7okSU80WTrn4LXlyXYbX3P",
+          "spotify:artist:7gW0r5CkdEUMm42w9XpyZO"
+        ],
+        "tracks": [
+          {
+            "trackName": "i can't help it",
+            "trackUri": "spotify:track:3F3roWqJPMtmLbPPl93bbR"
+          },
+          {
+            "trackName": "I GUESS I'M IN LOVE",
+            "trackUri": "spotify:track:1dB1kzLOjTcmSHttRd8bnV"
+          },
+          {
+            "trackName": "Mr. Loverman",
+            "trackUri": "spotify:track:2IVsRhKrx8hlQBOWy4qebo"
+          }
+        ]
+      }
+    ]
+  }
+}
