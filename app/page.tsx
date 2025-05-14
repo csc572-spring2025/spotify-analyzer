@@ -1,6 +1,8 @@
 "use client"
 import { useSession } from "next-auth/react"
 import { signIn, signOut } from "next-auth/react"
+import UserProfile from "./components/UserProfile"
+import TopItems from "./components/TopItems"
 
 export default function Home() {
   const { data: session } = useSession()
@@ -9,11 +11,11 @@ export default function Home() {
 
   if (session) {
     return (
-      <div className="p-6">
-        <p className="text-white font-normal text-xl mt-5 mb-2">Signed In as</p>
-        <span className="bold-txt">{session?.user?.name}</span>
+      <div className="p-6 space-y-8">
+        <UserProfile />
+        <TopItems />
         <p
-          className="opacity-70 mt-8 mb-5 underline cursor-pointer"
+          className="opacity-70 mt-8 mb-5 underline cursor-pointer text-white"
           onClick={() => signOut()}
         >
           Sign Out
