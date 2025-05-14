@@ -5,8 +5,14 @@ import SpotifyProvider from "next-auth/providers/spotify"
 const options: NextAuthOptions = {
   providers: [
     SpotifyProvider({
+      /*
+      user-read-recently-played: access most recently played tracks
+      user-read-currently-playing
+      user-read-playback-state
+      user-modify-playback-state
+      */
       authorization:
-        "https://accounts.spotify.com/authorize?scope=user-read-email,playlist-read-private,playlist-modify-private,playlist-modify-public",
+        "https://accounts.spotify.com/authorize?scope=user-read-email,playlist-read-private,playlist-modify-private,playlist-modify-public,user-top-read",
       clientId: process.env.SPOTIFY_CLIENT_ID || "",
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
     }),
