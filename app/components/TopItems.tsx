@@ -1,6 +1,15 @@
+// file to get data about top songs, top artists, and then style
+
 "use client"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
+
+/* interfaces: for type checking and don't exist at runtime
+define shape/structure of an object
+no implementation details
+
+i.e. an Artist must have a name property that is a string
+*/
 
 interface Artist {
   name: string
@@ -26,14 +35,18 @@ interface TopItems {
 type TimeRange = "short_term" | "medium_term" | "long_term"
 
 export default function TopItems() {
+  // initial variables and setter functions
   const { data: session } = useSession()
   const [topItems, setTopItems] = useState<TopItems>({ artists: [], tracks: [] })
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>("medium_term")
 
+  // fetching top items from spotify
   const fetchTopItems = async (range: TimeRange) => {
+    // check valid spotify access token
     if (session?.token?.access_token) {
       try {
+        // show loading state
         setLoading(true)
         console.log("Fetching with token:", session.token.access_token)
         
@@ -48,6 +61,24 @@ export default function TopItems() {
         )
         const artistsData = await artistsResponse.json()
         console.log("Artists response:", artistsData)
+
+        // Fetch complete artist details including genres
+        const artistsWithDetails = await Promise.all(
+          artistsData.items.map(async (artist: any) => {
+            console.log("Fetching details for artist:", artist.name, "ID:", artist.id)
+            const artistResponse = await fetch(
+              `https://api.spotify.com/v1/artists/${artist.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${session.token.access_token}`,
+                },
+              }
+            )
+            const artistDetails = await artistResponse.json()
+            console.log("Artist details response:", artistDetails)
+            return artistDetails
+          })
+        )
 
         // Fetch top tracks
         const tracksResponse = await fetch(
@@ -72,7 +103,7 @@ export default function TopItems() {
         }
 
         setTopItems({
-          artists: artistsData.items || [],
+          artists: artistsWithDetails || [],
           tracks: tracksData.items || [],
         })
       } catch (error) {
@@ -85,6 +116,8 @@ export default function TopItems() {
     }
   }
 
+  // React useEffect hook
+  // effect update whenever session, timeRange changes
   useEffect(() => {
     console.log("Session changed:", session)
     fetchTopItems(timeRange)
