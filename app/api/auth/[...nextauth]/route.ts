@@ -1,5 +1,4 @@
 /*
-Adds an API route 
 Configures NextAuth.js to authenticate users using SpotifyProvider (Spotify's authorization provider)
 */
 
@@ -32,7 +31,7 @@ const options: NextAuthOptions = {
       }
       return token // the token is automatically encrypted and stored as a cookie by NextAuth
     },
-    // called when a session is created (sessions are objects containing user data after the user signs in)
+    // called when a session is created (sessions are objects containing login info)
     async session({ session, token }) {
       // adds the entire JWT token to the session
       return {
