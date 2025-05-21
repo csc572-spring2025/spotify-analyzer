@@ -1,6 +1,18 @@
+// file to get data about top songs, top artists, and then style
+
 "use client"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
+
+let track_limit = 6
+let artist_limit = 8
+
+/* interfaces: for type checking and don't exist at runtime
+define shape/structure of an object
+no implementation details
+
+i.e. an Artist must have a name property that is a string
+*/
 
 interface Artist {
   name: string
@@ -22,24 +34,28 @@ interface TopItems {
   tracks: Track[]
 }
 
-// three ranges that spotify has data for: 4 weeks, 6 months, All Time 
+// Three ranges that Spotify has data for: 4 weeks, 6 months, All Time
 type TimeRange = "short_term" | "medium_term" | "long_term"
 
 export default function TopItems() {
+  // initial variables and setter functions
   const { data: session } = useSession()
   const [topItems, setTopItems] = useState<TopItems>({ artists: [], tracks: [] })
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>("medium_term")
 
+  // fetching top items from spotify
   const fetchTopItems = async (range: TimeRange) => {
+    // check valid spotify access token
     if (session?.token?.access_token) {
       try {
+        // show loading state
         setLoading(true)
         console.log("Fetching with token:", session.token.access_token)
-        
+
         // Fetch top artists
         const artistsResponse = await fetch(
-          `https://api.spotify.com/v1/me/top/artists?limit=5&time_range=${range}`,
+          `https://api.spotify.com/v1/me/top/artists?limit=${artist_limit}&time_range=${range}`,
           {
             headers: {
               Authorization: `Bearer ${session.token.access_token}`,
@@ -49,9 +65,27 @@ export default function TopItems() {
         const artistsData = await artistsResponse.json()
         console.log("Artists response:", artistsData)
 
+        // Fetch complete artist details including genres
+        const artistsWithDetails = await Promise.all(
+          artistsData.items.map(async (artist: any) => {
+            console.log("Fetching details for artist:", artist.name, "ID:", artist.id)
+            const artistResponse = await fetch(
+              `https://api.spotify.com/v1/artists/${artist.id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${session.token.access_token}`,
+                },
+              }
+            )
+            const artistDetails = await artistResponse.json()
+            console.log("Artist details response:", artistDetails)
+            return artistDetails
+          })
+        )
+
         // Fetch top tracks
         const tracksResponse = await fetch(
-          `https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=${range}`,
+          `https://api.spotify.com/v1/me/top/tracks?limit=${track_limit}&time_range=${range}`,
           {
             headers: {
               Authorization: `Bearer ${session.token.access_token}`,
@@ -72,7 +106,7 @@ export default function TopItems() {
         }
 
         setTopItems({
-          artists: artistsData.items || [],
+          artists: artistsWithDetails || [],
           tracks: tracksData.items || [],
         })
       } catch (error) {
@@ -85,6 +119,8 @@ export default function TopItems() {
     }
   }
 
+  // React useEffect hook
+  // effect update whenever session, timeRange changes
   useEffect(() => {
     console.log("Session changed:", session)
     fetchTopItems(timeRange)
@@ -130,60 +166,67 @@ export default function TopItems() {
         </button>
       </div>
 
-      {/* Top Artists */}
-      <div className="bg-gray-800 rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Top Artists</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex justify-between">
+        {/* Top Artists */}
+        <div className="bg-gray-800 rounded-lg p-6">
+          <h2 className="text-2xl font-bold text-white mb-4">Top Artists</h2>
           {topItems.artists && topItems.artists.length > 0 ? (
-            topItems.artists.map((artist, index) => (
-              <div key={index} className="bg-gray-700 rounded-lg p-4">
-                {artist.images?.[0] && (
-                  <img
-                    src={artist.images[0].url}
-                    alt={artist.name}
-                    className="w-full h-48 object-cover rounded-lg mb-2"
-                  />
-                )}
-                <h3 className="text-xl font-semibold text-white">{artist.name}</h3>
-                {artist.genres && artist.genres.length > 0 && (
-                  <p className="text-gray-300 text-sm">
-                    {artist.genres.slice(0, 2).join(", ")}
-                  </p>
-                )}
-              </div>
-            ))
+            <ul className="space-y-3">
+              {topItems.artists.map((artist, index) => (
+                <li
+                  key={index}
+                  className="flex items-center space-x-4 bg-gray-700 rounded-lg p-3 w-100"
+                >
+                  {artist.images?.[0] && (
+                    <img
+                      src={artist.images[0].url}
+                      alt={artist.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{artist.name}</h3>
+                    {artist.genres && artist.genres.length > 0 && (
+                      <p className="text-gray-300 text-sm">
+                        {artist.genres.slice(0, 2).join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
             <p className="text-gray-300">No artists found</p>
           )}
         </div>
-      </div>
 
-      {/* Top Tracks */}
-      <div className="bg-gray-800 rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Top Tracks</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {topItems.tracks && topItems.tracks.length > 0 ? (
-            topItems.tracks.map((track, index) => (
-              <div key={index} className="bg-gray-700 rounded-lg p-4">
-                {track.album?.images?.[0] && (
-                  <img
-                    src={track.album.images[0].url}
-                    alt={track.name}
-                    className="w-full h-48 object-cover rounded-lg mb-2"
-                  />
-                )}
-                <h3 className="text-xl font-semibold text-white">{track.name}</h3>
-                <p className="text-gray-300">
-                  {track.artists.map((artist) => artist.name).join(", ")}
-                </p>
-                <p className="text-gray-400 text-sm">{track.album.name}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-300">No tracks found</p>
-          )}
+        {/* Top Tracks */}
+        <div className="bg-gray-800 rounded-lg p-6 ml-3">
+          <h2 className="text-2xl font-bold text-white mb-4">Top Tracks</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topItems.tracks && topItems.tracks.length > 0 ? (
+              topItems.tracks.map((track, index) => (
+                <div key={index} className="bg-gray-700 rounded-lg p-4">
+                  {track.album?.images?.[0] && (
+                    <img
+                      src={track.album.images[0].url}
+                      alt={track.name}
+                      className="w-64 h-64 object-cover rounded-lg mb-2 m-auto"
+                    />
+                  )}
+                  <h3 className="text-l font-semibold text-white mt-5">{track.name}</h3>
+                  <p className="text-gray-300">
+                    {track.artists.map((artist) => artist.name).join(", ")}
+                  </p>
+                  <p className="text-gray-400 text-xs">{track.album.name}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-300">No tracks found</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   )
-} 
+}
