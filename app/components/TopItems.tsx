@@ -178,10 +178,10 @@ export default function TopItems() {
                     <img
                       src={track.album.images[0].url}
                       alt={track.name}
-                      className="w-full h-48 object-cover rounded-lg mb-2"
+                      className="w-64 h-64 object-cover rounded-lg mb-2 m-auto"
                     />
                   )}
-                  <h3 className="text-l font-semibold text-white">{track.name}</h3>
+                  <h3 className="text-l font-semibold text-white mt-5">{track.name}</h3>
                   <p className="text-gray-300">
                     {track.artists.map((artist) => artist.name).join(", ")}
                   </p>
