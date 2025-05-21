@@ -34,7 +34,7 @@ const options: NextAuthOptions = {
     },
     // called when a session is created (sessions are objects containing login info)
     async session({ session, token }) {
-      // adds the entire JWT token to the session
+      // adds JWT token to the session
       return {
         ...session,
         token,
