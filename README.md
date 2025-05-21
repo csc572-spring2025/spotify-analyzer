@@ -5,17 +5,27 @@ Developed by CSC572: The Open Source Movement, Spring 2024-2025
 
 ## Brief Description
 
-Spotify Analyzer is a web application that allows users to analyze their Spotify listening habits. It provides insights into the user's music preferences, including genres, artists, and tracks. Specifically, the top 5 artists, the top 5 songs, new artist discoveries, and mood trends are features that are provided. The application uses the Spotify API to fetch user data and presents it in an easy-to-understand format.
+Spotify Analyzer is a web application that allows users to analyze their Spotify listening habits. It provides insights into the user's music preferences, including top genres, artists, and tracks. Specifically, the top 5 artists, the top 5 songs, new artist discoveries, and mood trends are features that are provided. The application uses the Spotify API to fetch user data and presents it in an easy-to-understand format.
 
 The project is built using Next.js and TypeScript, ensuring a modern and efficient development experience. The application is designed to be user-friendly, with a clean and intuitive interface.
 
 ![some kind of image or visual](https://via.placeholder.com/600x400.png?text=Spotify+Analyzer)
 
-### Using Spotify Analyzer
+### Using Spotify Analyzer (as a Dev)
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-First, run the development server:
+First, modify the `.env.local` file:
+
+`SPOTIFY_CLIENT_ID = your-client-id`
+`SPOTIFY_SECRET = your-secret`
+
+These are created at https://developer.spotify.com/dashboard.
+
+`NEXTAUTH_SECRET= openssl rand -base64 32`
+`NEXTAUTH_URL = http://127.0.0.1:3000`
+
+Now, run the development server (install node.js using `npm install` if needed):
 
 ```bash
 npm run dev
