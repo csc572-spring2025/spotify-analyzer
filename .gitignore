@@ -1,4 +1,7 @@
 .env.local
 node_modules
-.next/
+next
+.next
+.next/*
 .git 
+.next
