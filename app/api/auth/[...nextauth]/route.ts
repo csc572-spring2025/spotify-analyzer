@@ -24,11 +24,21 @@ const options: NextAuthOptions = {
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
     }),
   ],
-  callbacks: {  // functions that are called when a certain action is performed
+  pages: {
+    signIn: "/",
+    error: "/",
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60, // 1 hour
+  },
+  callbacks: {
+    // functions that are called when a certain action is performed
     // called when a JSON web token (jwt) is created or updated
     async jwt({ token, account }) {
       if (account) {
         token.access_token = account.access_token // stores access token in a JWT
+        token.expires_at = account.expires_at // store when token expires
       }
       return token // the token is automatically encrypted and stored as a cookie by NextAuth
     },

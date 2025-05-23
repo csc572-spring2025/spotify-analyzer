@@ -1,11 +1,9 @@
 "use client"
-import { useSession } from "next-auth/react"
-import { signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import UserProfile from "./components/UserProfile"
 import TopItems from "./components/TopItems"
 import ArtistDiscovery from "./components/ArtistDiscovery"
-import MoodTrends from "./components/MoodTrends"
-import SignOutButton from "./components/SignOutButton"
+import HomePage from "./components/HomePage"
 // import GenreTrends from "./components/GenreTrends"
 
 export default function Home() {
@@ -13,27 +11,31 @@ export default function Home() {
 
   console.log(session)
 
+  const handleSignOut = () => {
+    signOut({
+      callbackUrl: "/",
+      redirect: true,
+    })
+  }
+
   if (session) {
     return (
       <div className="p-6 space-y-8">
         <UserProfile />
         <TopItems />
         <ArtistDiscovery />
-        <MoodTrends />
         {/* <GenreTrends /> */}
         <div className="flex justify-center">
-          <SignOutButton />
+          <button
+            onClick={handleSignOut}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     )
   } else {
-    return (
-      <button
-        onClick={() => signIn("spotify")}
-        className="shadow-primary w-56 h-16 rounded-xl bg-white border-0 text-black text-3xl active:scale-[0.99] m-6"
-      >
-        Sign In
-      </button>
-    )
+    return <HomePage />
   }
 }
