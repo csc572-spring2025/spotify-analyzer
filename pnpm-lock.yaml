@@ -1,3 +1,6 @@
+# A lock file generaed by the pnpm package manager, containing a complete list of all dependencies and versions.
+# Ensures reliable installations in all environments
+
 lockfileVersion: '9.0'
 
 settings:
