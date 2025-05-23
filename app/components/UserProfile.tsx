@@ -3,6 +3,7 @@
 "use client"
 import { useSession } from "next-auth/react" // useSession extracts the Session object
 import { useEffect, useState } from "react"
+import Image from "next/image"
 
 // the following Typescript interfaces define the shape (properties and types) of different data structures
 interface SpotifyProfile {
@@ -21,13 +22,24 @@ interface SpotifySession {
 
 // exports a component UserProfile() with user data
 export default function UserProfile() {
-  const { data: session, status } = useSession() as { data: SpotifySession | null, status: string }
+  const { data: session, status } = useSession() as {
+    data: SpotifySession | null
+    status: string
+  }
   const [profile, setProfile] = useState<SpotifyProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // fetch data from Spotify
   useEffect(() => {
+    // Reset state when session changes
+    if (status === "unauthenticated") {
+      setProfile(null)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
     const fetchProfile = async () => {
       if (!session?.token?.access_token) return
 
@@ -43,10 +55,32 @@ export default function UserProfile() {
         })
 
         if (!profileResponse.ok) {
+          if (profileResponse.status === 429) {
+            setError(
+              "Please wait a moment - we're getting your data too quickly. Try again in a few seconds."
+            )
+            setLoading(false)
+            return
+          } else if (profileResponse.status === 401) {
+            setError(
+              "Your session has expired. Please sign out and sign in again."
+            )
+            setLoading(false)
+            return
+          }
           throw new Error(`Profile fetch failed: ${profileResponse.status}`)
         }
 
         const profileData = await profileResponse.json()
+
+        if (profileData.error) {
+          setError(
+            `Spotify is temporarily unavailable. Please try again in a moment.`
+          )
+          setLoading(false)
+          return
+        }
+
         setProfile(profileData)
       } catch (error) {
         console.error("Error fetching profile:", error)
@@ -89,19 +123,29 @@ export default function UserProfile() {
     <div className="p-6 bg-gray-800 rounded-lg shadow-lg">
       <div className="flex items-center space-x-4">
         {profile.images?.[0]?.url && (
-          <img
+          <Image
             src={profile.images[0].url}
             alt="Profile"
-            className="w-24 h-24 rounded-full"
+            width={96}
+            height={96}
+            className="rounded-full"
           />
         )}
         <div>
-          <h2 className="text-2xl font-bold text-white">{profile.display_name}</h2>
-          <p className="text-gray-300">Followers: {profile.followers?.total || 0}</p>
-          <p className="text-gray-300">Country: {profile.country || "Unknown"}</p>
-          <p className="text-gray-300">Account Type: {formatAccountType(profile.product)}</p>
+          <h2 className="text-2xl font-bold text-white">
+            {profile.display_name}
+          </h2>
+          <p className="text-gray-300">
+            Followers: {profile.followers?.total || 0}
+          </p>
+          <p className="text-gray-300">
+            Country: {profile.country || "Unknown"}
+          </p>
+          <p className="text-gray-300">
+            Account Type: {formatAccountType(profile.product)}
+          </p>
         </div>
       </div>
     </div>
   )
-} 
+}
