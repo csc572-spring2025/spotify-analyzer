@@ -1,9 +1,10 @@
 // file to get data about the user profile, and then style
 
 "use client"
-import { useSession } from "next-auth/react"
+import { useSession } from "next-auth/react" // useSession extracts the Session object
 import { useEffect, useState } from "react"
 
+// the following Typescript interfaces define the shape (properties and types) of different data structures
 interface SpotifyProfile {
   display_name: string
   images: { url: string }[]
@@ -18,12 +19,14 @@ interface SpotifySession {
   }
 }
 
+// exports a component UserProfile() with user data
 export default function UserProfile() {
   const { data: session, status } = useSession() as { data: SpotifySession | null, status: string }
   const [profile, setProfile] = useState<SpotifyProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // fetch data from Spotify
   useEffect(() => {
     const fetchProfile = async () => {
       if (!session?.token?.access_token) return
@@ -58,6 +61,7 @@ export default function UserProfile() {
     }
   }, [session, status])
 
+  // different messages to show depending on the status of fetching the data
   if (status === "loading" || loading) {
     return <div className="text-white">Loading profile...</div>
   }
@@ -74,12 +78,13 @@ export default function UserProfile() {
     return <div className="text-white">No profile data available</div>
   }
 
-  // Format account type for display
+  // format account type for display
   const formatAccountType = (type: string | undefined | null) => {
     if (!type) return "Unknown"
     return type.charAt(0).toUpperCase() + type.slice(1)
   }
 
+  // renders UI, styled using Tailwind CSS
   return (
     <div className="p-6 bg-gray-800 rounded-lg shadow-lg">
       <div className="flex items-center space-x-4">
