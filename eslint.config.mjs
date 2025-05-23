@@ -1,3 +1,5 @@
+// Sets up ESLint to check code errors and follow best practices, and adds support for Next.js and TypeScript
+
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
