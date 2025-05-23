@@ -15,15 +15,17 @@ The project is built using Next.js and TypeScript, ensuring a modern and efficie
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-First, modify the `.env.local` file:
+First, modify the `.env.local` file by adding these four lines:
 
-`SPOTIFY_CLIENT_ID = your-client-id`
+`SPOTIFY_CLIENT_ID = your-client-id` <br>
 `SPOTIFY_SECRET = your-secret`
 
-These are created at https://developer.spotify.com/dashboard.
+These first two lines are created at https://developer.spotify.com/dashboard. You need to create an app and then you can find the client_id and secret.
 
-`NEXTAUTH_SECRET= openssl rand -base64 32`
+`NEXTAUTH_SECRET= openssl rand -base64 32` <br>
 `NEXTAUTH_URL = http://127.0.0.1:3000`
+
+The nextauth_secret is a `32-digit base64 string`. Also, you need to put `http://127.0.0.1:3000` as the recall address in the Spotify Developer App that you have created. 
 
 Now, run the development server (install node.js using `npm install` if needed):
 
