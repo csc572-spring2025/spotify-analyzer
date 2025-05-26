@@ -1,9 +1,13 @@
+/*
+  This file sets up a homepage for non-logged in users, a page for logged in users, and a log out button.
+*/
+
 "use client"
-import { useSession, signOut } from "next-auth/react"
-import UserProfile from "./components/UserProfile"
-import TopItems from "./components/TopItems"
+import { signOut, useSession } from "next-auth/react"
 import ArtistDiscovery from "./components/ArtistDiscovery"
 import HomePage from "./components/HomePage"
+import TopItems from "./components/TopItems"
+import UserProfile from "./components/UserProfile"
 // import GenreTrends from "./components/GenreTrends"
 
 export default function Home() {
@@ -11,6 +15,7 @@ export default function Home() {
 
   console.log(session)
 
+  // function that returns the user to the homepage if they sign out
   const handleSignOut = () => {
     signOut({
       callbackUrl: "/",
@@ -18,13 +23,15 @@ export default function Home() {
     })
   }
 
+  // if the user is signed in, show the personalized page
+  // if not, display the homepage
   if (session) {
     return (
       <div className="p-6 space-y-8">
         <UserProfile />
         <TopItems />
         <ArtistDiscovery />
-        {/* <GenreTrends /> */}
+        {/* set up the sign out button */}
         <div className="flex justify-center">
           <button
             onClick={handleSignOut}

@@ -1,3 +1,6 @@
+/*
+  This file sets up tailwind CSS to be used in other files
+*/
 @import "tailwindcss";
 
 :root {
