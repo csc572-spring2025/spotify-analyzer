@@ -1,6 +1,6 @@
 // Allows us to control how Next.js behaves
 
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   images: {
