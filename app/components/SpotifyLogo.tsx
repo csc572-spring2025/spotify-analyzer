@@ -1,3 +1,9 @@
+/*
+Renders Spotify Logo
+*/
+
+// Renders Spotify Logo
+// Params: takes an optional string to apply custom styling, if applicable
 export function SpotifyLogo({ className }: { className?: string }) {
   return (
     <svg

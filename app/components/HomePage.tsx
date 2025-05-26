@@ -1,9 +1,14 @@
+/*
+This file is mostly HTML and contains the UI for the home page.
+*/
+
 "use client"
 
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { SpotifyLogo } from "./SpotifyLogo"
 
+// UI for the home page
 export default function Home() {
   return (
     <div className="flex flex-col">
@@ -12,6 +17,7 @@ export default function Home() {
           <SpotifyLogo className="h-8 w-8" />
           <span className="text-xl font-bold">Spotify Analyzer</span>
         </div>
+        {/* Navigation Bar */}
         <nav className="hidden md:flex gap-6 items-center">
           <Link
             href="#features"
@@ -33,6 +39,8 @@ export default function Home() {
           </Link>
         </nav>
       </header>
+
+      {/* Title and Sign In Button */}
       <section className="container mx-auto flex flex-col items-center justify-center gap-8 px-4 pb-32 pt-56 text-center max-w-4xl">
         <div className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
@@ -44,13 +52,15 @@ export default function Home() {
         </div>
         <div className="flex flex-col sm:flex-row">
           <button
-            onClick={() => signIn("spotify")}
+            onClick={() => signIn("spotify")} // Sign in Button
             className="bg-green-500 hover:bg-green-600 text-black font-bold px-8 py-4 text-lg rounded-full"
           >
             Connect with Spotify
           </button>
         </div>
       </section>
+
+      {/* Features Info */}
       <section id="features" className="container mx-auto px-4 pt-2 md:pb-16">
         <div className="grid gap-12 md:grid-cols-3">
           <div className="flex flex-col items-center gap-2 text-center">
@@ -125,6 +135,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* How It Works section */}
       <section id="how-it-works" className="bg-zinc-900 py-16 md:py-24">
         <div className="container mx-auto">
           <h2 className="mb-12 text-center text-3xl font-bold">How It Works</h2>
@@ -161,6 +173,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* FAQ */}
       <section id="faq" className="container mx-auto px-4 py-16 md:py-24">
         <h2 className="mb-12 text-center text-3xl font-bold">
           Frequently Asked Questions

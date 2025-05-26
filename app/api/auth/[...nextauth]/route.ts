@@ -24,13 +24,13 @@ const options: NextAuthOptions = {
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
     }),
   ],
-  pages: {
+  pages: { // redirects user to root URL for sign in and any errors
     signIn: "/",
     error: "/",
   },
-  session: {
+  session: { // use JSON web tokens (jwt) to store the Session (objects containing login info), expires after 1 hour
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 hour
+    maxAge: 60 * 60, // users have to re-authenticate after 1 hour
   },
   callbacks: {
     // functions that are called when a certain action is performed
@@ -42,7 +42,7 @@ const options: NextAuthOptions = {
       }
       return token // the token is automatically encrypted and stored as a cookie by NextAuth
     },
-    // called when a session is created (sessions are objects containing login info)
+    // called when a session is created
     async session({ session, token }) {
       // adds JWT token to the session
       return {

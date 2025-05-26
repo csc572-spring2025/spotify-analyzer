@@ -1,8 +1,14 @@
+/*
+This file contains the code for the Discover Artist feature: 
+- Get recommended a random new artist based on your top 5 listening genres (you select one)
+*/
+
 "use client"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 
+// Define basic data structure for Artist object (returned by Spotify)
 interface Artist {
   id: string
   name: string
@@ -11,18 +17,21 @@ interface Artist {
   popularity: number
 }
 
+// Extends Artist object with extra discovery info
 interface DiscoveryArtist extends Artist {
   reason: string
   relatedTo?: string
   genres: string[]
 }
 
+// Session object from NextAuth with access token used to authenticate Spotify API requests
 interface SpotifySession {
   token: {
     access_token: string
   }
 }
 
+// Raw Artist item (structure returned by search/top artists function in Spotify)
 interface SpotifyArtistItem {
   id: string
   name: string
@@ -31,20 +40,29 @@ interface SpotifyArtistItem {
   popularity: number
 }
 
+/* 
+Main component for the ArtistDiscovery feature
+- Fetches top 25 artists, extracts top 5 genres from these artists
+- Lets users select one of these top 5 genres
+- Displays a random new artist in the selected genre
+*/
 export default function ArtistDiscovery() {
+  // Get spotify access token from Session
   const { data: session, status } = useSession() as {
     data: SpotifySession | null
     status: string
   }
-  const [loading, setLoading] = useState(false)
-  const [initialLoading, setInitialLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Component state
+  const [loading, setLoading] = useState(false) // tracks if app is currently fetching a new artist
+  const [initialLoading, setInitialLoading] = useState(true) // tracks if app is still loading
+  const [error, setError] = useState<string | null>(null) // stores any error message
   const [discoveredArtist, setDiscoveredArtist] =
-    useState<DiscoveryArtist | null>(null)
-  const [userTopGenres, setUserTopGenres] = useState<string[]>([])
-  const [userTopArtists, setUserTopArtists] = useState<Artist[]>([])
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
+    useState<DiscoveryArtist | null>(null) // store most recently discovered artist or null
+  const [userTopGenres, setUserTopGenres] = useState<string[]>([]) // array of user's top genres
+  const [userTopArtists, setUserTopArtists] = useState<Artist[]>([]) // array of user's top artists
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null) // genre user selects to discover new artists in
 
+  // What to do based on the authentication status
   useEffect(() => {
     // Reset state when session changes
     if (status === "unauthenticated") {
@@ -59,6 +77,7 @@ export default function ArtistDiscovery() {
 
     // Fetch user's top artists and their genres
     const fetchUserTopArtists = async () => {
+      // Check if there is a valid access token
       if (!session?.token?.access_token) {
         setError("No session token available")
         setInitialLoading(false)
@@ -66,7 +85,8 @@ export default function ArtistDiscovery() {
       }
 
       try {
-        setError(null)
+        setError(null) // Reset any previous errors
+        // Get top artists
         const response = await fetch(
           "https://api.spotify.com/v1/me/top/artists?limit=25&time_range=medium_term",
           {
@@ -76,6 +96,7 @@ export default function ArtistDiscovery() {
           }
         )
 
+        // Error handling and error messages
         if (!response.ok) {
           if (response.status === 429) {
             setError(
@@ -95,6 +116,7 @@ export default function ArtistDiscovery() {
 
         const data = await response.json()
 
+        // More error work: if Spotify returns an error object as a response
         if (data.error) {
           setError(
             `Spotify is temporarily unavailable. Please try again in a moment.`
@@ -103,6 +125,7 @@ export default function ArtistDiscovery() {
           return
         }
 
+        // More error work: no data returned (or not enough listening data collected for the user)
         if (!data.items || data.items.length === 0) {
           setError("No top artists found")
           setInitialLoading(false)
@@ -157,7 +180,7 @@ export default function ArtistDiscovery() {
           return
         }
 
-        setUserTopArtists(validArtists)
+        setUserTopArtists(validArtists) // Save top artists to state
 
         // Extract and count genres
         const genreMap = new Map<string, number>()
@@ -169,11 +192,11 @@ export default function ArtistDiscovery() {
 
         // Get top 5 genres
         const topGenres = Array.from(genreMap.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([genre]) => genre)
+          .sort((a, b) => b[1] - a[1]) // Sort by frequency
+          .slice(0, 5) // Take top 5
+          .map(([genre]) => genre) // Extract genre names from top 5
 
-        setUserTopGenres(topGenres)
+        setUserTopGenres(topGenres) // Save to state
         setError(null)
       } catch (error) {
         console.error("Error fetching top artists:", error)
@@ -181,7 +204,7 @@ export default function ArtistDiscovery() {
           error instanceof Error ? error.message : "Failed to fetch top artists"
         )
       } finally {
-        setInitialLoading(false)
+        setInitialLoading(false) // Mark loading as done
       }
     }
 
@@ -192,6 +215,7 @@ export default function ArtistDiscovery() {
 
   // Get a random artist from the selected genre
   const getRandomArtistFromGenre = async (genre: string) => {
+    // Check if there is a valid access token
     if (!session?.token?.access_token) {
       setError("No session token available")
       return
@@ -200,14 +224,14 @@ export default function ArtistDiscovery() {
     try {
       setLoading(true)
       setError(null)
-      setSelectedGenre(genre)
+      setSelectedGenre(genre) // Save selected genre to state
 
-      // Search for artists in the selected genre
+      // Search for artists in the selected genre, building a query
       const searchUrl = new URL("https://api.spotify.com/v1/search")
       searchUrl.searchParams.append("q", `genre:"${genre}"`)
       searchUrl.searchParams.append("type", "artist")
-      searchUrl.searchParams.append("limit", "50")
-      searchUrl.searchParams.append("market", "US")
+      searchUrl.searchParams.append("limit", "50") // max 50 results
+      searchUrl.searchParams.append("market", "US") // in the US market
 
       console.log("Searching artists with URL:", searchUrl.toString())
 
@@ -218,6 +242,7 @@ export default function ArtistDiscovery() {
         },
       })
 
+      // Error handling 
       if (!response.ok) {
         if (response.status === 429) {
           setError(
@@ -303,6 +328,7 @@ export default function ArtistDiscovery() {
         },
       })
 
+      // More error handling: rate limit and session expiration
       if (!artistResponse.ok) {
         if (artistResponse.status === 429) {
           setError(
@@ -325,7 +351,7 @@ export default function ArtistDiscovery() {
       const fullArtistDetails = await artistResponse.json()
       console.log("Artist details response:", fullArtistDetails)
 
-      if (!fullArtistDetails || !fullArtistDetails.id) {
+      if (!fullArtistDetails || !fullArtistDetails.id) { // if response is invalid
         setError("Invalid artist data received")
         setLoading(false)
         return
@@ -339,11 +365,12 @@ export default function ArtistDiscovery() {
         return
       }
 
-      // Find common genres
+      // Find common genres between new artist's genres and user's genres
       const commonGenres = fullArtistDetails.genres.filter((g: string) =>
         userTopGenres.includes(g)
       )
 
+      // Save discovered artist to state
       setDiscoveredArtist({
         ...fullArtistDetails,
         reason:
@@ -357,16 +384,18 @@ export default function ArtistDiscovery() {
         error instanceof Error ? error.message : "Failed to fetch artist"
       )
     } finally {
-      setLoading(false)
+      setLoading(false) // Set loading state to done
     }
   }
 
+  // Handles retries by clearing errors and triggering the fetching
   const handleRetry = () => {
     setError(null)
     setInitialLoading(true)
-    // The useEffect will handle the actual fetching
+    // The useEffect will handle the actual fetching by reacting to the setInitialLoading state
   }
 
+  // Display loading state
   if (status === "loading" || initialLoading) {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
@@ -376,6 +405,7 @@ export default function ArtistDiscovery() {
     )
   }
 
+  // Display prompt for user to sign in if not signed in
   if (status === "unauthenticated") {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
@@ -385,6 +415,7 @@ export default function ArtistDiscovery() {
     )
   }
 
+  // Show error message and retry button if request fails
   if (error) {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
@@ -400,10 +431,12 @@ export default function ArtistDiscovery() {
     )
   }
 
+  // The main interface for Arist Discovery display and genre selection
   return (
     <div className="bg-gray-800 rounded-lg p-6">
       <h2 className="text-2xl font-bold text-white mb-4">Artist Discovery</h2>
 
+      { /* Genre selection menu */ }
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-white mb-3">
           Select a Genre
@@ -411,7 +444,7 @@ export default function ArtistDiscovery() {
         <div className="flex items-center gap-4">
           <select
             value={selectedGenre || ""}
-            onChange={(e) => setSelectedGenre(e.target.value)}
+            onChange={(e) => setSelectedGenre(e.target.value)} 
             className="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={loading}
           >
@@ -439,8 +472,9 @@ export default function ArtistDiscovery() {
         </div>
       </div>
 
+      { /* If loading, show loading message, otherwise display new artist info */ }
       {loading ? (
-        <div className="text-white">Finding new artists...</div>
+        <div className="text-white">Finding new artists...</div> 
       ) : discoveredArtist ? (
         <div className="bg-gray-700 rounded-lg p-6">
           <div className="flex items-center space-x-4">
