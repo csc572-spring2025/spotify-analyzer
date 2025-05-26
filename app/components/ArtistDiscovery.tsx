@@ -1,4 +1,6 @@
 /*
+This file contains the code for the Discover Artist feature: 
+- Get recommended a random new artist based on your top 5 listening genres (you select one)
 */
 
 "use client"

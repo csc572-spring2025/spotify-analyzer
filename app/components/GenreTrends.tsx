@@ -1,23 +1,33 @@
+/*
+This file contains the UI and code that gets the user's top artists over 3 different time ranges.
+It fetches top artists and extracts genre info for each artist.
+*/
+
 "use client"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
+// Basic data structure for Artist object (returned by Spotify)
 interface Artist {
   name: string
   genres: string[]
 }
 
+// Structure for genre trend block
 interface GenreStats {
   genre: string
   count: number
   artists: string[]
 }
 
+// Spotify's three time range options (4 weeks, 6 months, all-time)
 type TimeRange = "short_term" | "medium_term" | "long_term"
 
+// Here is the UI code and the code executing the fetching of top artists
 export default function GenreTrends() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(true)
+  // Store genreStats by time range
   const [genreStats, setGenreStats] = useState<{
     [key in TimeRange]: GenreStats[]
   }>({
@@ -26,6 +36,7 @@ export default function GenreTrends() {
     long_term: [],
   })
 
+  // Fetching user's top artists in a given time range
   const fetchArtists = async (range: TimeRange) => {
     if (!session?.token?.access_token) return
 
@@ -56,6 +67,7 @@ export default function GenreTrends() {
       )
 
       // Process genres, skipping artists with no genres
+      // Maps genre to count and artist name
       const genreMap = new Map<string, { count: number; artists: string[] }>()
       
       artistsWithDetails.forEach((artist: Artist) => {
@@ -71,7 +83,7 @@ export default function GenreTrends() {
         }
       })
 
-      // Convert to array and sort by count
+      // Convert map to array and sort by count
       const stats = Array.from(genreMap.entries())
         .map(([genre, data]) => ({
           genre,
@@ -80,7 +92,7 @@ export default function GenreTrends() {
         }))
         .sort((a, b) => b.count - a.count)
 
-      setGenreStats((prev) => ({
+      setGenreStats((prev) => ({ // Save stats to state
         ...prev,
         [range]: stats,
       }))
@@ -89,6 +101,7 @@ export default function GenreTrends() {
     }
   }
 
+  // When Session starts or updates, fetch all three ranges in parallel
   useEffect(() => {
     if (session?.token?.access_token) {
       setLoading(true)
@@ -100,10 +113,11 @@ export default function GenreTrends() {
     }
   }, [session])
 
-  if (loading) {
+  if (loading) { // Display loading message while loading
     return <div className="text-white">Loading genre trends...</div>
   }
 
+  // UI displaying the user's top artists
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-white mb-4">Genre Trends</h2>
