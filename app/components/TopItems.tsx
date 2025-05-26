@@ -1,9 +1,10 @@
-// file to get data about top songs, top artists, and then style
-
+/*
+  This is the file for getting the top songs and artists from the API and styling them (Tailwind CSS).
+*/
 "use client"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 const track_limit = 6
 const artist_limit = 8
@@ -94,6 +95,7 @@ export default function TopItems() {
             }
           )
 
+          // handling error messages
           if (!artistsResponse.ok) {
             if (artistsResponse.status === 429) {
               setError(
@@ -116,6 +118,7 @@ export default function TopItems() {
           const artistsData = await artistsResponse.json()
           console.log("Artists response:", artistsData)
 
+          // API error handling
           if (artistsData.error) {
             console.error("Spotify API error:", artistsData.error)
             setError(
@@ -143,6 +146,7 @@ export default function TopItems() {
                 }
               )
 
+              // rate limit/failure error handling
               if (!artistResponse.ok) {
                 if (artistResponse.status === 429) {
                   console.warn(
@@ -177,6 +181,7 @@ export default function TopItems() {
             }
           )
 
+          // top tracks error handling
           if (!tracksResponse.ok) {
             if (tracksResponse.status === 429) {
               setError(
@@ -230,6 +235,7 @@ export default function TopItems() {
     }
   }, [session, timeRange, status])
 
+  // loading and other error messages
   if (status === "loading" || loading) {
     return <div className="text-white">Loading top items...</div>
   }
@@ -240,6 +246,7 @@ export default function TopItems() {
     )
   }
 
+  // runs if there is an error, creates retry button
   if (error) {
     return (
       <div className="text-white">
@@ -260,7 +267,8 @@ export default function TopItems() {
   return (
     <div className="space-y-8">
       {/* Time Range Selector */}
-      <div className="flex justify-center space-x-4 mb-6">
+      {/* Last 4 Weeks */}
+      <div className="flex justify-center space-x-4 mb-6"> 
         <button
           onClick={() => setTimeRange("short_term")}
           className={`px-4 py-2 rounded-lg ${
@@ -268,9 +276,10 @@ export default function TopItems() {
               ? "bg-green-500 text-white"
               : "bg-gray-700 text-gray-300"
           }`}
-        >
+        > 
           Last 4 Weeks
         </button>
+        {/* Last 6 Weeks */}
         <button
           onClick={() => setTimeRange("medium_term")}
           className={`px-4 py-2 rounded-lg ${
@@ -281,6 +290,7 @@ export default function TopItems() {
         >
           Last 6 Months
         </button>
+        {/* All Time */}
         <button
           onClick={() => setTimeRange("long_term")}
           className={`px-4 py-2 rounded-lg ${
@@ -293,8 +303,12 @@ export default function TopItems() {
         </button>
       </div>
 
+      {/*
+          Create one large div for the top artists and tracks
+          which allows for display flex to be used
+      */}
       <div className="flex justify-between">
-        {/* Top Artists */}
+        {/* Top Artists - created using a list*/}
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-2xl font-bold text-white mb-4">Top Artists</h2>
           {topItems.artists && topItems.artists.length > 0 ? (
@@ -331,7 +345,7 @@ export default function TopItems() {
           )}
         </div>
 
-        {/* Top Tracks */}
+        {/* Top Tracks - created using a grid */}
         <div className="bg-gray-800 rounded-lg p-6 ml-3">
           <h2 className="text-2xl font-bold text-white mb-4">Top Tracks</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

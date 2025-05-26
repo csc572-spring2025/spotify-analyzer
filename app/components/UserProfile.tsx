@@ -1,9 +1,10 @@
-// file to get data about the user profile, and then style
-
+/*
+  This file is for getting data about a user's profile and also for styling it.
+*/
 "use client"
-import { useSession } from "next-auth/react" // useSession extracts the Session object
-import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"; // useSession extracts the Session object
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 // the following Typescript interfaces define the shape (properties and types) of different data structures
 interface SpotifyProfile {
@@ -40,6 +41,7 @@ export default function UserProfile() {
       return
     }
 
+    // asyncrhonous function to fetch a user profile from the Spotify Web API
     const fetchProfile = async () => {
       if (!session?.token?.access_token) return
 
