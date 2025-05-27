@@ -3,21 +3,21 @@ This file is used to display some graphs of the general listening analytics for 
 */
 
 "use client"
-import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
 } from 'chart.js'
-import { Line, Bar } from 'react-chartjs-2'
-import { format, subDays, startOfDay } from 'date-fns'
+import { format, startOfDay, subDays } from 'date-fns'
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import { Bar, Line } from 'react-chartjs-2'
 
 // Register Chart.js components
 ChartJS.register(
@@ -423,32 +423,32 @@ export default function ListeningAnalytics() {
   return (
     <div className="bg-gray-800 rounded-lg p-6">
       <h2 className="text-2xl font-bold text-white mb-6">Listening Analytics</h2>
-      
-      <div className="space-y-8">
-        {/* Daily Listening Time Chart */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-xl font-semibold text-white mb-4">Daily Listening Time (Last 7 Days)</h3>
-          <div className="h-64">
-            <Line data={dailyChartData} options={chartOptions} />
+      <br></br>
+      <div className="flex row justify-between">
+          {/* Daily Listening Time Chart */}
+          <div className="bg-gray-700 rounded-lg p-4 w-100">
+            <h3 className="text-xl font-semibold text-white mb-4">Daily Listening Time (Last 7 Days)</h3>
+            <div className="h-64">
+              <Line data={dailyChartData} options={chartOptions} />
+            </div>
           </div>
-        </div>
 
-        {/* Hourly Listening Time Chart */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-xl font-semibold text-white mb-4">Listening Time by Hour of Day</h3>
-          <div className="h-64">
-            <Bar data={hourlyChartData} options={chartOptions} />
+          {/* Hourly Listening Time Chart */}
+          <div className="bg-gray-700 rounded-lg p-4 w-100">
+            <h3 className="text-xl font-semibold text-white mb-4">Listening Time by Hour of Day</h3>
+            <div className="h-64">
+              <Bar data={hourlyChartData} options={chartOptions} />
+            </div>
           </div>
-        </div>
 
-        {/* Genre Listening Time Chart */}
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-xl font-semibold text-white mb-4">Listening Time by Genre</h3>
-          <div className="h-64">
-            <Bar data={genreChartData} options={chartOptions} />
+          {/* Genre Listening Time Chart */}
+          <div className="bg-gray-700 rounded-lg p-4 w-100">
+            <h3 className="text-xl font-semibold text-white mb-4">Listening Time by Genre</h3>
+            <div className="h-64">
+              <Bar data={genreChartData} options={chartOptions} />
+            </div>
           </div>
         </div>
-      </div>
     </div>
   )
 } 
