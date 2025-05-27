@@ -16,7 +16,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 1. Modify the `.env.local` file by adding these four lines:
 
 `SPOTIFY_CLIENT_ID = your-client-id` <br>
-`SPOTIFY_SECRET = your-secret`
+`SPOTIFY_SECRET = your-secret` <br>
 `NEXTAUTH_SECRET= openssl rand -base64 32` <br>
 `NEXTAUTH_URL = http://127.0.0.1:3000`
 
@@ -48,8 +48,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Contributing to Spotify Analyzer
 
-You can start editing the web pages by modifying `app/page.tsx`. The pages auto-update as you edit the file.
-Also look at the components in the `app/components` directory. These components are used to build each page and can be modified to change the layout and functionality of the application.
+You can edit the web page by modifying `app/page.tsx`. The pages auto-update as you edit files.
+Also look at the components in the `app/components` directory. These components are used to build each component on the page and can be modified to change the layout and functionality of the applications. 
+
+Components We Want to Add:
+- Mood Trends Logic
+- Song Recommender 
 
 You can also check out the [Next.js documentation](https://nextjs.org/docs) for more information on how to use Next.js.
 
@@ -62,7 +66,7 @@ You can also check out the [Next.js documentation](https://nextjs.org/docs) for 
 
 ### Known Issues
 
-- Some features and data may not be displayed correctly due to API limitations.
+- Some features and data (specifically Listening Analytics) may not be displayed correctly due to API limitations.
 
 ### License
 
