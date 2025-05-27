@@ -30,7 +30,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 npm i
 ```
 
-3. Run the development server (install node.js using `npm install` if needed)
+3. Run the development server:
 
 Start the server by running
 
