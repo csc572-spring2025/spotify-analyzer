@@ -1,4 +1,6 @@
-Task-List: Spotify Data Analyzer 
+### Important Note: This is a legacy file.
+
+Task-List: Spotify Data Analyzer
 
 # Step 1: Git Repository 
 - Initialize GitHub repository and setup branching strategy
