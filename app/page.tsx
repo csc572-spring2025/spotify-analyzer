@@ -8,6 +8,7 @@ import ArtistDiscovery from "./components/ArtistDiscovery"
 import HomePage from "./components/HomePage"
 import TopItems from "./components/TopItems"
 import UserProfile from "./components/UserProfile"
+import ListeningAnalytics from "./components/ListeningAnalytics"
 // import GenreTrends from "./components/GenreTrends"
 
 export default function Home() {
@@ -31,6 +32,7 @@ export default function Home() {
         <UserProfile />
         <TopItems />
         <ArtistDiscovery />
+        <ListeningAnalytics />
         {/* set up the sign out button */}
         <div className="flex justify-center">
           <button
