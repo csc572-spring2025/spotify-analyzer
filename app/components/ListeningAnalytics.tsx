@@ -1,4 +1,3 @@
-
 /*
 This file is used to display some graphs of the general listening analytics for the user.
 */
@@ -35,6 +34,7 @@ ChartJS.register(
 interface Track {
   played_at: string
   track: {
+    id: string
     duration_ms: number
     artists: { name: string }[]
     name: string
@@ -47,6 +47,15 @@ interface GenreListeningData {
 
 interface DailyListeningData {
   [date: string]: number
+}
+
+interface HourlyListeningData {
+  [hour: string]: number
+}
+
+interface MoodData {
+  date: string
+  valence: number
 }
 
 interface SpotifySession {
@@ -65,8 +74,9 @@ export default function ListeningAnalytics() {
   const [error, setError] = useState<string | null>(null)
   const [dailyListening, setDailyListening] = useState<DailyListeningData>({})
   const [genreListening, setGenreListening] = useState<GenreListeningData>({})
+  const [hourlyListening, setHourlyListening] = useState<HourlyListeningData>({})
 
-  // Fetch recently played tracks and calculate listening time
+  // Fetch recently played tracks with pagination to get more comprehensive data
   const fetchListeningData = async () => {
     if (!session?.token?.access_token) return
 
@@ -74,55 +84,130 @@ export default function ListeningAnalytics() {
       setLoading(true)
       setError(null)
 
-      // Get recently played tracks (last 50)
-      const recentlyPlayedResponse = await fetch(
-        "https://api.spotify.com/v1/me/player/recently-played?limit=50",
-        {
-          headers: {
-            Authorization: `Bearer ${session.token.access_token}`,
-          },
-        }
-      )
-
-      if (!recentlyPlayedResponse.ok) {
-        if (recentlyPlayedResponse.status === 429) {
-          setError("Rate limited. Please try again in a few seconds.")
-          return
-        } else if (recentlyPlayedResponse.status === 401) {
-          setError("Session expired. Please sign out and sign in again.")
-          return
-        }
-        throw new Error(`Failed to fetch recently played: ${recentlyPlayedResponse.status}`)
-      }
-
-      const recentlyPlayedData = await recentlyPlayedResponse.json()
-
-      if (recentlyPlayedData.error) {
-        setError("Spotify is temporarily unavailable. Please try again.")
-        return
-      }
-
-      // Process daily listening data
       const dailyData: DailyListeningData = {}
       const genreData: GenreListeningData = {}
+      const hourlyData: HourlyListeningData = {}
 
-      // Initialize last 30 days with 0
-      for (let i = 29; i >= 0; i--) {
+      // Initialize last 7 days with 0
+      for (let i = 6; i >= 0; i--) {
         const date = format(startOfDay(subDays(new Date(), i)), 'yyyy-MM-dd')
         dailyData[date] = 0
       }
 
-      // Get artist details for genre information
-      const artistIds = new Set<string>()
-      recentlyPlayedData.items?.forEach((item: Track) => {
+      // Initialize 24 hours with 0
+      for (let i = 0; i < 24; i++) {
+        hourlyData[i.toString().padStart(2, '0')] = 0
+      }
+
+      // Fetch recently played tracks with pagination (no time filter)
+      let allTracks: Track[] = []
+      let nextUrl: string | null = `https://api.spotify.com/v1/me/player/recently-played?limit=50`
+      let requestCount = 0
+      const maxRequests = 5
+
+      while (nextUrl && requestCount < maxRequests) {
+        const response: Response = await fetch(nextUrl, {
+          headers: {
+            Authorization: `Bearer ${session.token.access_token}`,
+          },
+        })
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            setError("Rate limited. Please try again in a few seconds.")
+            return
+          } else if (response.status === 401) {
+            setError("Session expired. Please sign out and sign in again.")
+            return
+          }
+          throw new Error(`Failed to fetch recently played: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.error) {
+          setError("Spotify is temporarily unavailable. Please try again.")
+          return
+        }
+
+        if (data.items) {
+          allTracks = [...allTracks, ...data.items]
+        }
+
+        nextUrl = data.next
+        requestCount++
+        
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+
+      // Filter tracks to last 7 days and remove duplicates
+      const sevenDaysAgo = subDays(new Date(), 7)
+      const uniqueTracks = new Map()
+      
+      allTracks.forEach((item: Track) => {
+        const playedAt = new Date(item.played_at)
+        if (playedAt >= sevenDaysAgo) {
+          const key = `${item.played_at}-${item.track.name}`
+          if (!uniqueTracks.has(key)) {
+            uniqueTracks.set(key, item)
+          }
+        }
+      })
+
+      const filteredTracks = Array.from(uniqueTracks.values())
+
+      // Get unique track IDs for audio features
+      const trackIds = [...new Set(filteredTracks.map((item: Track) => item.track.id))]
+      
+      // Fetch audio features for tracks (batch request)
+      let audioFeatures: { [trackId: string]: any } = {}
+      
+      if (trackIds.length > 0) {
+        console.log(`Fetching audio features for ${trackIds.length} tracks`)
+        
+        // Spotify allows up to 100 track IDs per request
+        const batchSize = 100
+        for (let i = 0; i < trackIds.length; i += batchSize) {
+          const batch = trackIds.slice(i, i + batchSize)
+          const featuresResponse = await fetch(
+            `https://api.spotify.com/v1/audio-features?ids=${batch.join(',')}`,
+            {
+              headers: {
+                Authorization: `Bearer ${session.token.access_token}`,
+              },
+            }
+          )
+
+          if (featuresResponse.ok) {
+            const featuresData = await featuresResponse.json()
+            console.log(`Audio features response:`, featuresData)
+            
+            featuresData.audio_features?.forEach((feature: any) => {
+              if (feature && feature.id) {
+                audioFeatures[feature.id] = feature
+                console.log(`Track ${feature.id} valence: ${feature.valence}`)
+              }
+            })
+          } else {
+            console.error(`Failed to fetch audio features: ${featuresResponse.status}`)
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 100))
+        }
+      }
+
+      console.log(`Total audio features collected: ${Object.keys(audioFeatures).length}`)
+
+      // Get artist genre data (existing code)
+      const artistNames = new Set<string>()
+      filteredTracks.forEach((item: Track) => {
         item.track.artists.forEach(artist => {
           if (artist.name) {
-            artistIds.add(artist.name)
+            artistNames.add(artist.name)
           }
         })
       })
 
-      // Fetch top artists to get genre data (as a proxy for genre listening)
       const topArtistsResponse = await fetch(
         "https://api.spotify.com/v1/me/top/artists?limit=50&time_range=medium_term",
         {
@@ -136,37 +221,44 @@ export default function ListeningAnalytics() {
       
       if (topArtistsResponse.ok) {
         const topArtistsData = await topArtistsResponse.json()
-        
-        // Create a map of artist names to their genres
         topArtistsData.items?.forEach((artist: any) => {
           artistGenreMap[artist.name] = artist.genres || []
         })
       }
 
-      // Process the recently played tracks
-      recentlyPlayedData.items?.forEach((item: Track) => {
-        const playedDate = format(new Date(item.played_at), 'yyyy-MM-dd')
-        const durationMinutes = item.track.duration_ms / (1000 * 60) // Convert to minutes
+      // Process all tracks
+      filteredTracks.forEach((item: Track) => {
+        const playedAt = new Date(item.played_at)
+        const playedDate = format(playedAt, 'yyyy-MM-dd')
+        const playedHour = format(playedAt, 'HH')
+        const durationMinutes = item.track.duration_ms / (1000 * 60)
 
-        // Add to daily listening data
+        // Daily listening data
         if (dailyData.hasOwnProperty(playedDate)) {
           dailyData[playedDate] += durationMinutes
         }
 
-        // Add to genre listening data
+        // Hourly listening data
+        if (hourlyData.hasOwnProperty(playedHour)) {
+          hourlyData[playedHour] += durationMinutes
+        }
+
+        // Genre data (existing code)
         item.track.artists.forEach(artist => {
           const genres = artistGenreMap[artist.name] || ['Unknown']
           genres.forEach(genre => {
             if (!genreData[genre]) {
               genreData[genre] = 0
             }
-            genreData[genre] += durationMinutes
+            genreData[genre] += durationMinutes / genres.length
           })
         })
       })
 
+      console.log(`Processed ${filteredTracks.length} tracks from the last 7 days`)
       setDailyListening(dailyData)
       setGenreListening(genreData)
+      setHourlyListening(hourlyData)
 
     } catch (error) {
       console.error("Error fetching listening data:", error)
@@ -180,6 +272,7 @@ export default function ListeningAnalytics() {
     if (status === "unauthenticated") {
       setDailyListening({})
       setGenreListening({})
+      setHourlyListening({})
       setLoading(false)
       setError(null)
       return
@@ -201,6 +294,20 @@ export default function ListeningAnalytics() {
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         tension: 0.1,
         fill: true,
+      },
+    ],
+  }
+
+  // Prepare data for hourly listening bar chart
+  const hourlyChartData = {
+    labels: Object.keys(hourlyListening).map(hour => `${hour}:00`),
+    datasets: [
+      {
+        label: 'Listening Time (minutes)',
+        data: Object.values(hourlyListening),
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: 'rgb(59, 130, 246)',
+        borderWidth: 1,
       },
     ],
   }
@@ -320,9 +427,17 @@ export default function ListeningAnalytics() {
       <div className="space-y-8">
         {/* Daily Listening Time Chart */}
         <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-xl font-semibold text-white mb-4">Daily Listening Time (Last 30 Days)</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">Daily Listening Time (Last 7 Days)</h3>
           <div className="h-64">
             <Line data={dailyChartData} options={chartOptions} />
+          </div>
+        </div>
+
+        {/* Hourly Listening Time Chart */}
+        <div className="bg-gray-700 rounded-lg p-4">
+          <h3 className="text-xl font-semibold text-white mb-4">Listening Time by Hour of Day</h3>
+          <div className="h-64">
+            <Bar data={hourlyChartData} options={chartOptions} />
           </div>
         </div>
 
